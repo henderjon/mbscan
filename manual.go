@@ -19,7 +19,8 @@ SYNOPSIS
   $ {{.Bin}} [-h|help]
 
 DESCRIPTION
-  {{.Bin}} scans stdin and counts the number of bytes and runes to detect multi-byte characters.
+  {{.Bin}} scans stdin and counts the number of bytes and runes to
+  detect multi-byte characters.
 
 EXAMPLES
   $ {{.Bin}} -h
