@@ -10,12 +10,14 @@ import (
 var (
 	verbose bool
 	quiet   bool
+	path    string
 	out     LogWriter
 )
 
 func init() {
 	bi := getBuildInfo()
 	flag.BoolVar(&verbose, "v", false, "verbose; shows multi-byte characters found in the input stream and the byte and rune counts")
+	flag.StringVar(&path, "path", "", "an opaque string that is used to identify the source of the input stream")
 	flag.BoolVar(&quiet, "s", false, "silent; no output only exit codes")
 	flag.Usage = Usage(Info{
 		Bin:            bi.getBinName(),
@@ -46,7 +48,7 @@ func main() {
 	}
 
 	if !quiet {
-		fmt.Fprintln(os.Stdout, bc-rc)
+		fmt.Fprintf(os.Stdout, "%d %s\n", bc-rc, path)
 	}
 
 	if bc != rc {
