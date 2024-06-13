@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -26,29 +27,31 @@ func init() {
 		BuildTimestamp: bi.getBuildTimestamp(),
 	})
 	flag.Parse()
-
-	out = stdout
 }
 
 func main() {
-	scanner := bufio.NewScanner(os.Stdin)
+	scan(os.Stdin, stdout)
+}
+
+func scan(r io.Reader, w io.Writer) {
+	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanRunes)
 	bc, rc := 0, 0
 	for scanner.Scan() {
 		if verbose && len(scanner.Bytes()) > 1 {
-			fmt.Fprintf(out, "rune %d `%s` is %v\n", rc, scanner.Text(), scanner.Bytes())
+			fmt.Fprintf(w, "rune %d `%s` is %v\n", rc, scanner.Text(), scanner.Bytes())
 		}
 		bc += len(scanner.Bytes())
 		rc++
 	}
 
 	if verbose {
-		fmt.Fprintln(out, " Bytes: ", bc)
-		fmt.Fprintln(out, " Runes: ", rc)
+		fmt.Fprintln(w, " Bytes: ", bc)
+		fmt.Fprintln(w, " Runes: ", rc)
 	}
 
 	if !quiet {
-		fmt.Fprintf(os.Stdout, "%d %s\n", bc-rc, path)
+		fmt.Fprintf(w, "%d %s\n", bc-rc, path)
 	}
 
 	if bc != rc {
