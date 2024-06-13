@@ -7,13 +7,18 @@ SYNOPSIS
   $ mbscan [-h|help]
 
 DESCRIPTION
-  mbscan scans stdin and counts the number of bytes and runes to
-  detect multi-byte characters.
+  mbscan scans stdin and counts the number of bytes and runes to detect
+  multi-byte characters. Be default, it will output the difference of
+  bytes vs runes.
 
 EXAMPLES
-  $ mbscan -h
-  $ mbscan -v
+  $ mbscan -v < file.txt
+  $ cat file.txt | mbscan -v
 
 OPTIONS
-  -v	verbose; show any multi-byte characters found in the input stream
-  ```
+  -path string
+    	an opaque string that is used to identify the source of the input stream
+  -s	silent; no output only exit codes
+  -v	verbose; shows multi-byte characters found in the input stream and the byte and rune counts
+
+```
