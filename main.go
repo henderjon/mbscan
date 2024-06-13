@@ -9,16 +9,14 @@ import (
 
 var (
 	verbose bool
-	// vverbose bool
-	// quiet    bool
-	out LogWriter
+	quiet   bool
+	out     LogWriter
 )
 
 func init() {
 	bi := getBuildInfo()
-	flag.BoolVar(&verbose, "v", false, "verbose; show any multi-byte characters found in the input stream")
-	// flag.BoolVar(&vverbose, "vv", false, "very verbose; show any multi-byte characters found in the input stream")
-	// flag.BoolVar(&quiet, "s", false, "silent; no output only exit codes")
+	flag.BoolVar(&verbose, "v", false, "verbose; shows multi-byte characters found in the input stream and the byte and rune counts")
+	flag.BoolVar(&quiet, "s", false, "silent; no output only exit codes")
 	flag.Usage = Usage(Info{
 		Bin:            bi.getBinName(),
 		Version:        bi.getBuildVersion(),
@@ -45,6 +43,10 @@ func main() {
 	if verbose {
 		fmt.Fprintln(out, " Bytes: ", bc)
 		fmt.Fprintln(out, " Runes: ", rc)
+	}
+
+	if !quiet {
+		fmt.Fprintln(os.Stdout, bc-rc)
 	}
 
 	if bc != rc {

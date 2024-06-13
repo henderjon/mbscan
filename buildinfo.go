@@ -18,9 +18,6 @@ var (
 	compiledBy string
 )
 
-// build time flag to allow debug
-var allowDebug string
-
 type buildInfo struct {
 	BinName        string
 	BuildVersion   string

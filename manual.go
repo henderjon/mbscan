@@ -19,12 +19,13 @@ SYNOPSIS
   $ {{.Bin}} [-h|help]
 
 DESCRIPTION
-  {{.Bin}} scans stdin and counts the number of bytes and runes to
-  detect multi-byte characters.
+  {{.Bin}} scans stdin and counts the number of bytes and runes to detect
+  multi-byte characters. Be default, it will output the difference of
+  bytes vs runes.
 
 EXAMPLES
-  $ {{.Bin}} -h
-  $ {{.Bin}} -v
+  $ {{.Bin}} -v < file.txt
+  $ cat file.txt | {{.Bin}} -v
 
 OPTIONS
 {{.Options}}

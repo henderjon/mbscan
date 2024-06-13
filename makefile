@@ -11,13 +11,11 @@ BINDIR=bin
 RELEASEDIR=release
 HEAD=$(shell git describe --dirty --long --tags 2> /dev/null  || git rev-parse --short HEAD)
 COHASH=$(shell git rev-parse --short HEAD)
-TIMESTAMP=$(shell TZ=UTC date '+%FT%TZ')
+TIMESTAMP=$(shell TZ=UTC date '+%FT%T (%Z)')
 TEST_COVER_FILE=$(BIN)-test-coverage.out
-# TIMESTAMP=$(shell date '+%Y-%m-%dT%H:%M:%S %z %Z')
+# TIMESTAMP=$(shell date '+%Y-%m-%dT%H:%M:%S %z (%Z)')
 
 LDFLAGS="-X 'main.binName=$(BIN)' -X 'main.buildVersion=$(HEAD)' -X 'main.buildTimestamp=$(TIMESTAMP)' -X 'main.compiledBy=$(shell go version)'"
-DBGLDFLAGS="-X 'main.binName=$(BIN)' -X 'main.buildVersion=$(HEAD)' -X 'main.buildTimestamp=$(TIMESTAMP)' -X 'main.compiledBy=$(shell go version)' -X 'main.allowDebug=true'"
-# LDFLAGS="-X 'main.buildVersion=$(HEAD)' -X 'main.buildTimestamp=$(TIMESTAMP)'"
 
 all: prod
 
@@ -71,7 +69,7 @@ demo: local
 
 .PHONY: test
 test: dep check
-	GOEXPERIMENT=loopvar go test -tags memory -covermode=count ./...
+	go test -tags memory -covermode=count ./...
 
 .PHONY: test-cover
 test-cover:
@@ -85,13 +83,13 @@ test-cover:
 
 .PHONY: debug
 debug: dep check
-	GOEXPERIMENT=loopvar go build -ldflags $(DBGLDFLAGS) -o $(BINDIR)/$(BIN)
+	go build -ldflags $(DBGLDFLAGS) -o $(BINDIR)/$(BIN)
 
 .PHONY: release
 release: prod
-	GOEXPERIMENT=loopvar go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)
+	go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)
 	tar -czf $(RELEASEDIR)/$(BIN)-$(COHASH)-$(GOOS)-$(GOARCH).tgz -C $(BINDIR) $(BIN)
 
 .PHONY: prod
 prod: dep check
-	GOEXPERIMENT=loopvar GOWORK=off go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)
+	GOWORK=off go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)
