@@ -31,7 +31,9 @@ func init() {
 func main() {
 	bc, rc := scan(os.Stdin, func(w io.Writer) tokenFunc {
 		return func(runePos int, byt []byte) {
-			fmt.Fprintf(w, "rune %d `%s` is %v\n", runePos, string(byt), byt)
+			if verbose {
+				fmt.Fprintf(w, "rune %d `%s` is %v\n", runePos, string(byt), byt)
+			}
 		}
 	}(stdout))
 
@@ -58,7 +60,7 @@ func scan(r io.Reader, tf tokenFunc) (int, int) {
 	scanner.Split(bufio.ScanRunes)
 	bc, rc := 0, 0
 	for scanner.Scan() {
-		if verbose && len(scanner.Bytes()) > 1 {
+		if len(scanner.Bytes()) > 1 {
 			tf(rc, scanner.Bytes())
 		}
 		bc += len(scanner.Bytes())
