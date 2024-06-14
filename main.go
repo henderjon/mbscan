@@ -12,7 +12,6 @@ var (
 	verbose bool
 	quiet   bool
 	path    string
-	out     LogWriter
 )
 
 func init() {
@@ -30,28 +29,19 @@ func init() {
 }
 
 func main() {
-	scan(os.Stdin, stdout)
-}
-
-func scan(r io.Reader, w io.Writer) {
-	scanner := bufio.NewScanner(r)
-	scanner.Split(bufio.ScanRunes)
-	bc, rc := 0, 0
-	for scanner.Scan() {
-		if verbose && len(scanner.Bytes()) > 1 {
-			fmt.Fprintf(w, "rune %d `%s` is %v\n", rc, scanner.Text(), scanner.Bytes())
+	bc, rc := scan(os.Stdin, func(w io.Writer) printFunc {
+		return func(fmtString string, params ...any) {
+			fmt.Fprintf(w, fmtString, params...)
 		}
-		bc += len(scanner.Bytes())
-		rc++
-	}
+	}(stdout))
 
 	if verbose {
-		fmt.Fprintln(w, " Bytes: ", bc)
-		fmt.Fprintln(w, " Runes: ", rc)
+		fmt.Fprintln(stdout, " Bytes: ", bc)
+		fmt.Fprintln(stdout, " Runes: ", rc)
 	}
 
 	if !quiet {
-		fmt.Fprintf(w, "%d %s\n", bc-rc, path)
+		fmt.Fprintf(stdout, "%d %s\n", bc-rc, path)
 	}
 
 	if bc != rc {
@@ -59,4 +49,20 @@ func scan(r io.Reader, w io.Writer) {
 	}
 
 	os.Exit(0)
+}
+
+type printFunc func(fmtString string, params ...any)
+
+func scan(r io.Reader, pf printFunc) (int, int) {
+	scanner := bufio.NewScanner(r)
+	scanner.Split(bufio.ScanRunes)
+	bc, rc := 0, 0
+	for scanner.Scan() {
+		if verbose && len(scanner.Bytes()) > 1 {
+			pf("rune %d `%s` is %v\n", rc, scanner.Text(), scanner.Bytes())
+		}
+		bc += len(scanner.Bytes())
+		rc++
+	}
+	return bc, rc
 }
