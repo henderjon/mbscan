@@ -29,9 +29,9 @@ func init() {
 }
 
 func main() {
-	bc, rc := scan(os.Stdin, func(w io.Writer) printFunc {
-		return func(fmtString string, params ...any) {
-			fmt.Fprintf(w, fmtString, params...)
+	bc, rc := scan(os.Stdin, func(w io.Writer) tokenFunc {
+		return func(runePos int, byt []byte) {
+			fmt.Fprintf(w, "rune %d `%s` is %v\n", runePos, string(byt), byt)
 		}
 	}(stdout))
 
@@ -51,15 +51,15 @@ func main() {
 	os.Exit(0)
 }
 
-type printFunc func(fmtString string, params ...any)
+type tokenFunc func(runePos int, byt []byte)
 
-func scan(r io.Reader, pf printFunc) (int, int) {
+func scan(r io.Reader, tf tokenFunc) (int, int) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanRunes)
 	bc, rc := 0, 0
 	for scanner.Scan() {
 		if verbose && len(scanner.Bytes()) > 1 {
-			pf("rune %d `%s` is %v\n", rc, scanner.Text(), scanner.Bytes())
+			tf(rc, scanner.Bytes())
 		}
 		bc += len(scanner.Bytes())
 		rc++
