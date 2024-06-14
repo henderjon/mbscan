@@ -15,16 +15,10 @@ var (
 )
 
 func init() {
-	bi := getBuildInfo()
 	flag.BoolVar(&verbose, "v", false, "verbose; shows multi-byte characters found in the input stream and the byte and rune counts")
 	flag.StringVar(&path, "path", "", "an opaque string that is used to identify the source of the input stream")
 	flag.BoolVar(&quiet, "s", false, "silent; no output only exit codes")
-	flag.Usage = Usage(Info{
-		Bin:            bi.getBinName(),
-		Version:        bi.getBuildVersion(),
-		CompiledBy:     bi.getCompiledBy(),
-		BuildTimestamp: bi.getBuildTimestamp(),
-	})
+	flag.Usage = RenderManualPage()
 	flag.Parse()
 }
 

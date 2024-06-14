@@ -9,69 +9,73 @@ import (
 )
 
 // Tmpl is a basic man page[-ish] looking template
-const Tmpl = `
+const ManualPageTemplate = `
 {{define "manual"}}
 NAME
-  {{.Bin}} - compare byte and rune counts from stdin
+  {{.BinName}} - compare byte and rune counts from stdin
 
 SYNOPSIS
-  $ {{.Bin}}
-  $ {{.Bin}} [-h|help]
+  $ {{.BinName}}
+  $ {{.BinName}} [-h|help]
 
 DESCRIPTION
-  {{.Bin}} scans stdin and counts the number of bytes and runes to detect
+  {{.BinName}} scans stdin and counts the number of bytes and runes to detect
   multi-byte characters. Be default, it will output the difference of
   bytes vs runes.
 
 EXAMPLES
-  $ {{.Bin}} -v < file.txt
-  $ cat file.txt | {{.Bin}} -v
+  $ {{.BinName}} -v < file.txt
+  $ cat file.txt | {{.BinName}} -v
 
 OPTIONS
 {{.Options}}
 VERSION
-  version:  {{.Version}}
+  version:  {{.BuildVersion}}
   compiled: {{.CompiledBy}}
   built:    {{.BuildTimestamp}}
 
 {{end}}
 `
 
-// Info represents the information used in the default Tmpl string
-type Info struct {
-	Tmpl           string
-	Bin            string
-	Version        string
-	CompiledBy     string
+// these vars are built at compile time, DO NOT ALTER
+var (
+	// Version adds build information
+	BinName string
+	// Version adds build information
+	BuildVersion string
+	// BuildTimestamp adds build information
 	BuildTimestamp string
-	Options        string
-	QuickHelp      string
-}
+	// CompiledBy adds the make/model that was used to compile
+	CompiledBy string
+)
 
 // Usage wraps a set of `Info` and creates a flag.Usage func
-func Usage(info Info) func() {
-	if len(info.Tmpl) == 0 {
-		info.Tmpl = Tmpl
-	}
-
-	t := template.Must(template.New("manual").Parse(info.Tmpl))
+func RenderManualPage() func() {
+	t := template.Must(template.New("manual").Parse(ManualPageTemplate))
 
 	return func() {
 		var def bytes.Buffer
 		flag.CommandLine.SetOutput(&def)
 		flag.PrintDefaults()
 
-		info.Options = def.String()
-		t.Execute(os.Stdout, info)
+		t.Execute(os.Stdout, struct {
+			BinName        string
+			Options        string
+			BuildVersion   string
+			BuildTimestamp string
+			CompiledBy     string
+		}{
+			Options:        def.String(),
+			BinName:        BinName,
+			BuildVersion:   BuildVersion,
+			BuildTimestamp: BuildTimestamp,
+			CompiledBy:     CompiledBy,
+		})
 	}
 }
 
-func MultiUsage(flags []*flag.FlagSet, info Info) func() {
-	if len(info.Tmpl) == 0 {
-		info.Tmpl = Tmpl
-	}
-
-	t := template.Must(template.New("manual").Parse(info.Tmpl))
+func RenderManualPageMulti(flags []*flag.FlagSet) func() {
+	t := template.Must(template.New("manual").Parse(ManualPageTemplate))
 
 	return func() {
 		var def bytes.Buffer
@@ -80,7 +84,23 @@ func MultiUsage(flags []*flag.FlagSet, info Info) func() {
 			f.SetOutput(&def)
 			f.PrintDefaults()
 		}
-		info.Options = def.String()
-		t.Execute(os.Stdout, info)
+
+		t.Execute(os.Stdout, struct {
+			Options        string
+			BinName        string
+			BuildVersion   string
+			BuildTimestamp string
+			CompiledBy     string
+		}{
+			Options:        def.String(),
+			BinName:        BinName,
+			BuildVersion:   BuildVersion,
+			BuildTimestamp: BuildTimestamp,
+			CompiledBy:     CompiledBy,
+		})
 	}
+}
+
+func GetVersionString() string {
+	return fmt.Sprintf("%s version %s", BinName, BuildVersion)
 }

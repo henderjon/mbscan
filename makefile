@@ -15,7 +15,7 @@ TIMESTAMP=$(shell TZ=UTC date '+%FT%T (%Z)')
 TEST_COVER_FILE=$(BIN)-test-coverage.out
 # TIMESTAMP=$(shell date '+%Y-%m-%dT%H:%M:%S %z (%Z)')
 
-LDFLAGS="-X 'main.binName=$(BIN)' -X 'main.buildVersion=$(HEAD)' -X 'main.buildTimestamp=$(TIMESTAMP)' -X 'main.compiledBy=$(shell go version)'"
+LDFLAGS="-X 'main.BinName=$(BIN)' -X 'main.BuildVersion=$(HEAD)' -X 'main.BuildTimestamp=$(TIMESTAMP)' -X 'main.CompiledBy=$(shell go version)'"
 
 all: prod
 
