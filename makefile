@@ -17,7 +17,7 @@ TEST_COVER_FILE=$(BIN)-test-coverage.out
 
 LDFLAGS="-X 'main.BinName=$(BIN)' -X 'main.BuildVersion=$(HEAD)' -X 'main.BuildTimestamp=$(TIMESTAMP)' -X 'main.CompiledBy=$(shell go version)'"
 
-all: prod
+all: local
 
 .PHONY: version
 version:
@@ -32,7 +32,7 @@ dep:
 	go mod tidy
 
 .PHONY: check
-check: dep _setup
+check:
 	goimports -w ./
 	go vet
 
@@ -43,13 +43,14 @@ check: dep _setup
 .PHONY: _setup
 _setup:
 	mkdir -p $(BINDIR)
+	mkdir -p $(RELEASEDIR)
 
 .PHONY: clean
 clean:
 	rm -f $(BIN) $(BIN)-* $(BINDIR)/$(BIN) $(BINDIR)/$(BIN)-*
 
 .PHONY: install
-install: prod
+install: local
 	mkdir -p $(PREFIX)/$(BINDIR)
 	mv $(BINDIR)/$(BIN) $(PREFIX)/$(BINDIR)/$(BIN)
 	@echo "\ninstalled $(BIN) to $(PREFIX)/$(BINDIR)\n"
@@ -63,33 +64,28 @@ uninstall:
 #### TESING
 ################################################################################
 
-.PHONY: demo
-demo: local
-	./$(BINDIR)/$(BIN) -file "example/short" -debug
-
 .PHONY: test
 test: dep check
 	go test -tags memory -covermode=count ./...
 
 .PHONY: test-cover
-test-cover:
-	go mod tidy
+test-cover: dep check
 	go test -tags memory -covermode=count -coverprofile $(TEST_COVER_FILE) ./...
 	go tool cover -html=$(TEST_COVER_FILE)
 
 ################################################################################
-#### MACOS BUILDS
+#### BUILDS
 ################################################################################
 
 .PHONY: debug
-debug: dep check
+debug: dep check _setup
 	go build -ldflags $(DBGLDFLAGS) -o $(BINDIR)/$(BIN)
 
+.PHONY: local
+local: dep check _setup
+	GOWORK=off go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)
+
 .PHONY: release
-release: prod
+release: dep check _setup
 	go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)
 	tar -czf $(RELEASEDIR)/$(BIN)-$(COHASH)-$(GOOS)-$(GOARCH).tgz -C $(BINDIR) $(BIN)
-
-.PHONY: prod
-prod: dep check
-	GOWORK=off go build -ldflags $(LDFLAGS) -o $(BINDIR)/$(BIN)

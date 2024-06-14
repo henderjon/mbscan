@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-// Tmpl is a basic man page[-ish] looking template
+// ManualPageTemplate is a basic man page[-ish] looking template
 const ManualPageTemplate = `
 {{define "manual"}}
 NAME
@@ -59,8 +59,8 @@ func RenderManualPage() func() {
 		flag.PrintDefaults()
 
 		t.Execute(os.Stdout, struct {
-			BinName        string
 			Options        string
+			BinName        string
 			BuildVersion   string
 			BuildTimestamp string
 			CompiledBy     string
